@@ -57,6 +57,21 @@ spec:
 
 ---
 
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: siaknng-payment-autoscale
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1beta2
+    kind: Deployment
+    name: siaknng-payment-deployment
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 50
+
+---
+
 apiVersion: batch/v1
 kind: Job
 metadata:

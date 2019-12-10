@@ -57,6 +57,21 @@ spec:
 
 ---
 
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: siaknng-calendar-autoscale
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1beta2
+    kind: Deployment
+    name: siaknng-calendar-deployment
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 50
+
+---
+
 apiVersion: batch/v1
 kind: Job
 metadata:
