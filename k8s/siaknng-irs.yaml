@@ -1,0 +1,87 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: siaknng-irs-deployment
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: siaknng-irs
+  template:
+    metadata:
+      labels:
+        app: siaknng-irs
+    spec:
+      containers:
+        - name: siaknng-irs-container
+          image: siaknngregistry.azurecr.io/irs:1.0.2
+          command: ['gunicorn', 'irs.wsgi:application', '--bind', ':80']
+          ports:
+          - containerPort: 80
+          env:
+            - name: SECRET_KEY
+              value: "f3t^9es$l+!6y4qjrl+^_8$z$-2as4kkoj=ly36)^vph9_!z(j"
+            - name: ALLOWED_HOSTS
+              value: "*"
+            - name: POSTGRES_HOST
+              value: postgres-irs
+            - name: POSTGRES_NAME
+              value: postgres
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-irs-credentials
+                  key: user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-irs-credentials
+                  key: password
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: siaknng-irs-service
+spec:
+  selector:
+    app: siaknng-irs
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: LoadBalancer
+
+---
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: siaknng-irs-migration-1.0.2
+spec:
+  template:
+    spec:
+      containers:
+        - name: siaknng-irs-migration-container
+          image: siaknngregistry.azurecr.io/irs:1.0.2
+          command: ['python', 'manage.py', 'migrate']
+          env:
+            - name: SECRET_KEY
+              value: "f3t^9es$l+!6y4qjrl+^_8$z$-2as4kkoj=ly36)^vph9_!z(j"
+            - name: POSTGRES_HOST
+              value: postgres-irs
+            - name: POSTGRES_NAME
+              value: postgres
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-irs-credentials
+                  key: user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-irs-credentials
+                  key: password
+      restartPolicy: Never
+  backoffLimit: 5
