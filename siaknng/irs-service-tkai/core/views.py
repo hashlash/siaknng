@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 import requests
 import json
 import datetime
+from django.conf import settings
 
 def index(request):
     return HttpResponse("Hello, world. You're at the core index.")
@@ -34,14 +35,14 @@ def setMatkul(request):
         
         # Melakukan pemanggilan service pembayaran dan service kalender
         response_pembayaran = requests.get(
-            # 'http://www.mocky.io/v2/5deb48072f00000e0007e1d1', 
-            'http://165.22.108.118:8001/api/pembayaran-siak/',
+            # 'http://www.mocky.io/v2/5deb48072f00000e0007e1d1',
+            PEMBAYARAN_SERVER + '/api/pembayaran-siak', 
             headers={'Authorization': token_acquired}
         )
 
         response_kalender = requests.get(
             # 'http://www.mocky.io/v2/5deb48902f0000750007e1d8',
-            'http://165.22.108.118:8000/api/jadwal-siak/', 
+            JADWAL_SERVER + '/api/jadwal-siak', 
             headers={'Authorization': token_acquired}
         )
         
@@ -79,7 +80,7 @@ def getMatkul(request):
         # request ke /account/ dengan token
         response_account = requests.get(
             # works
-            'http://www.mocky.io/v2/5de66c953700004f00092366',
+            # 'http://www.mocky.io/v2/5de66c953700004f00092366',
             
             # fakultas not found
             # 'http://www.mocky.io/v2/5de66cd13700005d00092369',

@@ -81,6 +81,10 @@ DATABASES = {
     }
 }
 
+if 'DATABASE_URL' in os.environ:
+    DATABASES['default'] = dj_database_url.config(conn_max_age=600)
+
+
 # POSTGRES
 if all(key in os.environ for key in ['POSTGRES_USER', 'POSTGRES_PASSWORD']):
     DATABASES['default'] = {
@@ -91,7 +95,6 @@ if all(key in os.environ for key in ['POSTGRES_USER', 'POSTGRES_PASSWORD']):
         'HOST': os.environ.get('POSTGRES_HOST', 'postgres'),
         'PORT': os.environ.get('POSTGRES_PORT', 5432),
     }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -132,3 +135,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+AUTH_SERVER = 'http://' + os.environ['AUTH_HOST'] + ':' + os.environ['AUTH_PORT']
+PEMBAYARAN_SERVER = 'http://' + os.environ['PEMBAYARAN_HOST'] + ':' + os.environ['PEMBAYARAN_PORT']
+KALENDER_SERVER = 'http://' + os.environ['KALENDER_HOST'] + ':' + os.environ['KALENDER_PORT']
