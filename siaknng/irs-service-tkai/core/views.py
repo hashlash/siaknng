@@ -23,26 +23,27 @@ def setMatkul(request):
         # request ke /account/ dengan token untuk mendapatkan obj user
         response_account = requests.get(
             # works
-            'http://www.mocky.io/v2/5de66c953700004f00092366',
+            # 'http://www.mocky.io/v2/5de66c953700004f00092366',
             
             # fakultas not found
             # 'http://www.mocky.io/v2/5de66cd13700005d00092369',
 
             # matakuliah 0
             # 'http://www.mocky.io/v2/5de66e4a3700005d00092376',
+            settings.AUTH_SERVER + '/auth/account/',
             headers={'Authorization': token_acquired}
         )
         
         # Melakukan pemanggilan service pembayaran dan service kalender
         response_pembayaran = requests.get(
             # 'http://www.mocky.io/v2/5deb48072f00000e0007e1d1',
-            PEMBAYARAN_SERVER + '/api/pembayaran-siak', 
+            settings.PEMBAYARAN_SERVER + '/api/pembayaran-siak/', 
             headers={'Authorization': token_acquired}
         )
 
         response_kalender = requests.get(
             # 'http://www.mocky.io/v2/5deb48902f0000750007e1d8',
-            JADWAL_SERVER + '/api/jadwal-siak', 
+            settings.JADWAL_SERVER + '/api/jadwal-siak/', 
             headers={'Authorization': token_acquired}
         )
         
@@ -87,6 +88,7 @@ def getMatkul(request):
 
             # matakuliah 0
             # 'http://www.mocky.io/v2/5de66e4a3700005d00092376',
+            settings.AUTH_SERVER + '/auth/account/',
             headers={'Authorization': token_acquired}
         )
         faculty_id = int(response_account.json()['faculty_id'])
