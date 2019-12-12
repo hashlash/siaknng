@@ -57,7 +57,12 @@ def setMatkul(request):
                 jadwal_available = i['status_jadwal'] 
 
         # Mengambil response dari service pembayaran dan service kalender
-        pembayaran_available = response_pembayaran.json()['status_pembayaran']
+        response_pem = response_pembayaran.json()
+        pembayaran_available = False
+        for i in response_pem:
+            if(npm == i['npm_mahasiswa']):
+                pembayaran_available = i['status_pembayaran']
+                
         if(jadwal_available and pembayaran_available):
             # Get Faculty ID untuk konfirmasi tanggal pelaksanaan irs
             try:
