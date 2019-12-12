@@ -37,6 +37,18 @@ spec:
                 secretKeyRef:
                   name: postgres-irs-credentials
                   key: password
+            - name: AUTH_HOST
+              value: siaknng-auth-service
+            - name: AUTH_PORT
+              value: "80"
+            - name: PEMBAYARAN_HOST
+              value: siaknng-payment-service
+            - name: PEMBAYARAN_PORT
+              value: "80"
+            - name: KALENDER_HOST
+              value: siaknng-calendar-service
+            - name: KALENDER_PORT
+              value: "80"
 
 ---
 
