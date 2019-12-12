@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: siaknng-irs-container
-          image: siaknngregistry.azurecr.io/irs:1.0.2
+          image: siaknngregistry.azurecr.io/irs:1.0.3
           command: ['gunicorn', 'irs.wsgi:application', '--bind', ':80']
           ports:
           - containerPort: 80
