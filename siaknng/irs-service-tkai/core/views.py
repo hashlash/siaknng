@@ -43,16 +43,23 @@ def setMatkul(request):
 
         response_kalender = requests.get(
             # 'http://www.mocky.io/v2/5deb48902f0000750007e1d8',
-            settings.JADWAL_SERVER + '/api/jadwal-siak/', 
+            settings.KALENDER_SERVER + '/api/jadwal-siak/', 
             headers={'Authorization': token_acquired}
         )
         
+        
+        npm = response_account.json()['npm']
+        faculty_id = response_account.json()['faculty_id']
+        jadwal_available = False
+        response_kal = response_kalender.json()
+        for i in response_kal:
+            if(i['id_fakultas'] == faculty_id):
+                jadwal_available = i['status_jadwal'] 
+
         # Mengambil response dari service pembayaran dan service kalender
         pembayaran_available = response_pembayaran.json()['status_pembayaran']
-        jadwal_available = response_kalender.json()['status_jadwal']
         if(jadwal_available and pembayaran_available):
             # Get Faculty ID untuk konfirmasi tanggal pelaksanaan irs
-            faculty_id = int(response_account.json()['faculty_id'])
             try:
                 Fakultas.objects.get(id=faculty_id)
             except:
