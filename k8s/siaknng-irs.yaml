@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: siaknng-irs-container
-          image: siaknng.azurecr.io/irs:1.0.2
+          image: siaknng.azurecr.io/irs:1.0.3
           command: ['gunicorn', 'irs.wsgi:application', '--bind', ':80']
           ports:
           - containerPort: 80
@@ -90,13 +90,13 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: siaknng-irs-migration-1.0.2
+  name: siaknng-irs-migration-1.0.3
 spec:
   template:
     spec:
       containers:
         - name: siaknng-irs-migration-container
-          image: siaknng.azurecr.io/irs:1.0.2
+          image: siaknng.azurecr.io/irs:1.0.3
           command: ['python', 'manage.py', 'migrate']
           env:
             - name: SECRET_KEY
@@ -115,5 +115,17 @@ spec:
                 secretKeyRef:
                   name: postgres-irs-credentials
                   key: password
+            - name: AUTH_HOST
+              value: siaknng-auth-service
+            - name: AUTH_PORT
+              value: "80"
+            - name: PEMBAYARAN_HOST
+              value: siaknng-payment-service
+            - name: PEMBAYARAN_PORT
+              value: "80"
+            - name: KALENDER_HOST
+              value: siaknng-calendar-service
+            - name: KALENDER_PORT
+              value: "80"
       restartPolicy: Never
   backoffLimit: 5
