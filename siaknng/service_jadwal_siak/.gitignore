@@ -5,7 +5,6 @@ env
 db.sqlite3
 
 api_jadwal_siak/*cache*
-api_jadwal_siak/migrations/*
 
 service_jadwal_siak/__py*cach*
 static/

@@ -1,1 +1,6 @@
+*.pyc
+*.sqlite3
+__pycache__
 data_pembayaran_siak
+env
+static

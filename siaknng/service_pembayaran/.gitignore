@@ -4,6 +4,6 @@
 env
 db.sqlite3
 api_pembayaran/*cache*
-api_pembayaran/migrations/*
 service_pembayaran/__py*cach*
 data
+static

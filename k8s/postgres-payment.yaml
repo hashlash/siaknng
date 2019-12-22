@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-payment-credentials
+type: Opaque
+data:
+  user: cGF5bWVudA==
+  password: cGFzc3BheW1lbnQ=
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-payment-pv
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/postgres-payment-pv
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-payment-pvc
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  volumeName: postgres-payment-pv
+
+---
+
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: postgres-payment-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-payment-container
+  template:
+    metadata:
+      labels:
+        app: postgres-payment-container
+    spec:
+      containers:
+        - name: postgres-payment-container
+          image: postgres:latest
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-payment-credentials
+                  key: user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-payment-credentials
+                  key: password
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: pgdata-payment
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: pgdata-payment
+          persistentVolumeClaim:
+            claimName: postgres-payment-pvc
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-payment
+spec:
+  selector:
+    app: postgres-payment-container
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

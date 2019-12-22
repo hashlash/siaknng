@@ -1,20 +1,21 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: siaknng-auth-deployment
+  name: siaknng-irs-deployment
 spec:
   replicas: 1
   selector: 
     matchLabels:
-      app: siaknng-auth
+      app: siaknng-irs
   template:
     metadata:
       labels:
-        app: siaknng-auth
+        app: siaknng-irs
     spec:
       containers:
-        - name: siaknng-auth-container
-          image: siaknng.azurecr.io/auth:1.0.5
+        - name: siaknng-irs-container
+          image: siaknng.azurecr.io/irs:1.0.2
+          command: ['gunicorn', 'irs.wsgi:application', '--bind', ':80']
           ports:
           - containerPort: 80
           env:
@@ -23,19 +24,31 @@ spec:
             - name: ALLOWED_HOSTS
               value: "*"
             - name: POSTGRES_HOST
-              value: postgres-auth
+              value: postgres-irs
             - name: POSTGRES_NAME
               value: postgres
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: postgres-auth-credentials
+                  name: postgres-irs-credentials
                   key: user
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-auth-credentials
+                  name: postgres-irs-credentials
                   key: password
+            - name: AUTH_HOST
+              value: siaknng-auth-service
+            - name: AUTH_PORT
+              value: "80"
+            - name: PEMBAYARAN_HOST
+              value: siaknng-payment-service
+            - name: PEMBAYARAN_PORT
+              value: "80"
+            - name: KALENDER_HOST
+              value: siaknng-calendar-service
+            - name: KALENDER_PORT
+              value: "80"
           resources:
             requests:
               cpu: "200m"
@@ -47,10 +60,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: siaknng-auth-service
+  name: siaknng-irs-service
 spec:
   selector:
-    app: siaknng-auth
+    app: siaknng-irs
   ports:
   - protocol: TCP
     port: 80
@@ -62,12 +75,12 @@ spec:
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: siaknng-auth-autoscale
+  name: siaknng-irs-autoscale
 spec:
   scaleTargetRef:
     apiVersion: apps/v1beta2
     kind: Deployment
-    name: siaknng-auth-deployment
+    name: siaknng-irs-deployment
   minReplicas: 1
   maxReplicas: 5
   targetCPUUtilizationPercentage: 50
@@ -77,30 +90,30 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: siaknng-auth-migration
+  name: siaknng-irs-migration-1.0.2
 spec:
   template:
     spec:
       containers:
-        - name: siaknng-auth-migration-container
-          image: siaknng.azurecr.io/auth:1.0.5
+        - name: siaknng-irs-migration-container
+          image: siaknng.azurecr.io/irs:1.0.2
           command: ['python', 'manage.py', 'migrate']
           env:
             - name: SECRET_KEY
               value: "f3t^9es$l+!6y4qjrl+^_8$z$-2as4kkoj=ly36)^vph9_!z(j"
             - name: POSTGRES_HOST
-              value: postgres-auth
+              value: postgres-irs
             - name: POSTGRES_NAME
               value: postgres
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: postgres-auth-credentials
+                  name: postgres-irs-credentials
                   key: user
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-auth-credentials
+                  name: postgres-irs-credentials
                   key: password
       restartPolicy: Never
   backoffLimit: 5

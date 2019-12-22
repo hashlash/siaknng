@@ -1,20 +1,21 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: siaknng-auth-deployment
+  name: siaknng-payment-deployment
 spec:
   replicas: 1
   selector: 
     matchLabels:
-      app: siaknng-auth
+      app: siaknng-payment
   template:
     metadata:
       labels:
-        app: siaknng-auth
+        app: siaknng-payment
     spec:
       containers:
-        - name: siaknng-auth-container
-          image: siaknng.azurecr.io/auth:1.0.5
+        - name: siaknng-payment-container
+          image: siaknng.azurecr.io/payment:1.0.1
+          command: ['gunicorn', 'service_pembayaran.wsgi:application', '--bind', ':80']
           ports:
           - containerPort: 80
           env:
@@ -22,19 +23,21 @@ spec:
               value: "f3t^9es$l+!6y4qjrl+^_8$z$-2as4kkoj=ly36)^vph9_!z(j"
             - name: ALLOWED_HOSTS
               value: "*"
-            - name: POSTGRES_HOST
-              value: postgres-auth
-            - name: POSTGRES_NAME
+            - name: DB_HOST
+              value: postgres-payment
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
               value: postgres
-            - name: POSTGRES_USER
+            - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: postgres-auth-credentials
+                  name: postgres-payment-credentials
                   key: user
-            - name: POSTGRES_PASSWORD
+            - name: DB_PASS
               valueFrom:
                 secretKeyRef:
-                  name: postgres-auth-credentials
+                  name: postgres-payment-credentials
                   key: password
           resources:
             requests:
@@ -47,10 +50,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: siaknng-auth-service
+  name: siaknng-payment-service
 spec:
   selector:
-    app: siaknng-auth
+    app: siaknng-payment
   ports:
   - protocol: TCP
     port: 80
@@ -62,12 +65,12 @@ spec:
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: siaknng-auth-autoscale
+  name: siaknng-payment-autoscale
 spec:
   scaleTargetRef:
     apiVersion: apps/v1beta2
     kind: Deployment
-    name: siaknng-auth-deployment
+    name: siaknng-payment-deployment
   minReplicas: 1
   maxReplicas: 5
   targetCPUUtilizationPercentage: 50
@@ -77,30 +80,32 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: siaknng-auth-migration
+  name: siaknng-payment-migration-1.0.1
 spec:
   template:
     spec:
       containers:
-        - name: siaknng-auth-migration-container
-          image: siaknng.azurecr.io/auth:1.0.5
+        - name: siaknng-payment-migration-container
+          image: siaknng.azurecr.io/payment:1.0.1
           command: ['python', 'manage.py', 'migrate']
           env:
             - name: SECRET_KEY
               value: "f3t^9es$l+!6y4qjrl+^_8$z$-2as4kkoj=ly36)^vph9_!z(j"
-            - name: POSTGRES_HOST
-              value: postgres-auth
-            - name: POSTGRES_NAME
+            - name: DB_HOST
+              value: postgres-payment
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
               value: postgres
-            - name: POSTGRES_USER
+            - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: postgres-auth-credentials
+                  name: postgres-payment-credentials
                   key: user
-            - name: POSTGRES_PASSWORD
+            - name: DB_PASS
               valueFrom:
                 secretKeyRef:
-                  name: postgres-auth-credentials
+                  name: postgres-payment-credentials
                   key: password
       restartPolicy: Never
   backoffLimit: 5

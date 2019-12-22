@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-irs-credentials
+type: Opaque
+data:
+  user: aXJz
+  password: cGFzc2lycw==
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-irs-pv
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/postgres-irs-pv
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-irs-pvc
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  volumeName: postgres-irs-pv
+
+---
+
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: postgres-irs-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-irs-container
+  template:
+    metadata:
+      labels:
+        app: postgres-irs-container
+    spec:
+      containers:
+        - name: postgres-irs-container
+          image: postgres:latest
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-irs-credentials
+                  key: user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-irs-credentials
+                  key: password
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: pgdata-irs
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: pgdata-irs
+          persistentVolumeClaim:
+            claimName: postgres-irs-pvc
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-irs
+spec:
+  selector:
+    app: postgres-irs-container
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
