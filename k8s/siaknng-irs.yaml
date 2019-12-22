@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: siaknng-irs-container
-          image: siaknngregistry.azurecr.io/irs:1.0.2
+          image: siaknng.azurecr.io/irs:1.0.2
           command: ['gunicorn', 'irs.wsgi:application', '--bind', ':80']
           ports:
           - containerPort: 80
@@ -37,6 +37,23 @@ spec:
                 secretKeyRef:
                   name: postgres-irs-credentials
                   key: password
+            - name: AUTH_HOST
+              value: siaknng-auth-service
+            - name: AUTH_PORT
+              value: "80"
+            - name: PEMBAYARAN_HOST
+              value: siaknng-payment-service
+            - name: PEMBAYARAN_PORT
+              value: "80"
+            - name: KALENDER_HOST
+              value: siaknng-calendar-service
+            - name: KALENDER_PORT
+              value: "80"
+          resources:
+            requests:
+              cpu: "200m"
+            limits:
+              cpu: "500m"
 
 ---
 
@@ -79,7 +96,7 @@ spec:
     spec:
       containers:
         - name: siaknng-irs-migration-container
-          image: siaknngregistry.azurecr.io/irs:1.0.2
+          image: siaknng.azurecr.io/irs:1.0.2
           command: ['python', 'manage.py', 'migrate']
           env:
             - name: SECRET_KEY
