@@ -90,6 +90,9 @@ DATABASES = {
     }
 }
 
+AUTH_SERVER = 'http://' + os.environ['AUTH_HOST'] + ':' + os.environ['AUTH_PORT']
+PEMBAYARAN_SERVER = 'http://' + os.environ['PEMBAYARAN_HOST'] + ':' + os.environ['PEMBAYARAN_PORT']
+KALENDER_SERVER = 'http://' + os.environ['KALENDER_HOST'] + ':' + os.environ['KALENDER_PORT']
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
