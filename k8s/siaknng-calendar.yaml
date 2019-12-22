@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: siaknng-calendar-container
-          image: siaknngregistry.azurecr.io/calendar:1.0.1
+          image: siaknng.azurecr.io/calendar:1.0.1
           command: ['gunicorn', 'service_jadwal_siak.wsgi:application', '--bind', ':80']
           ports:
           - containerPort: 80
@@ -39,6 +39,11 @@ spec:
                 secretKeyRef:
                   name: postgres-calendar-credentials
                   key: password
+          resources:
+            requests:
+              cpu: "200m"
+            limits:
+              cpu: "500m"
 
 ---
 
@@ -81,7 +86,7 @@ spec:
     spec:
       containers:
         - name: siaknng-calendar-migration-container
-          image: siaknngregistry.azurecr.io/calendar:1.0.1
+          image: siaknng.azurecr.io/calendar:1.0.1
           command: ['python', 'manage.py', 'migrate']
           env:
             - name: SECRET_KEY

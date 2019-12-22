@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: siaknng-auth-container
-          image: siaknngregistry.azurecr.io/auth:1.0.5
+          image: siaknng.azurecr.io/auth:1.0.5
           ports:
           - containerPort: 80
           env:
@@ -36,6 +36,11 @@ spec:
                 secretKeyRef:
                   name: postgres-auth-credentials
                   key: password
+          resources:
+            requests:
+              cpu: "200m"
+            limits:
+              cpu: "500m"
 
 ---
 
@@ -78,7 +83,7 @@ spec:
     spec:
       containers:
         - name: siaknng-auth-migration-container
-          image: siaknngregistry.azurecr.io/auth:1.0.5
+          image: siaknng.azurecr.io/auth:1.0.5
           command: ['python', 'manage.py', 'migrate']
           env:
             - name: SECRET_KEY
