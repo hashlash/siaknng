@@ -72,10 +72,10 @@ def setMatkul(request):
             fakultas_ = Fakultas.objects.get(id=faculty_id)
             
             try:
-                out = request.POST['list_matkul']
+                data = json.loads(request.body.decode('utf-8'))
                 hasil = {
                     'status':'tersimpan',
-                    'mata_kuliah':json.loads(out)
+                    'mata_kuliah': data['list_matkul']
                 }
             except KeyError:
                 hasil = {

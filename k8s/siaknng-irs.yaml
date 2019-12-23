@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: siaknng-irs-container
-          image: siaknng.azurecr.io/irs:1.0.3
+          image: siaknng.azurecr.io/irs:1.0.6
           command: ['gunicorn', 'irs.wsgi:application', '--bind', ':80']
           ports:
           - containerPort: 80
@@ -90,13 +90,13 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: siaknng-irs-migration-1.0.3
+  name: siaknng-irs-migration-1.0.6
 spec:
   template:
     spec:
       containers:
         - name: siaknng-irs-migration-container
-          image: siaknng.azurecr.io/irs:1.0.3
+          image: siaknng.azurecr.io/irs:1.0.6
           command: ['python', 'manage.py', 'migrate']
           env:
             - name: SECRET_KEY
